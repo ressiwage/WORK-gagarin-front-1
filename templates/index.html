@@ -13,7 +13,7 @@
 
 <body>
     <form class="d-none" method="post" id="myform"  action="/predict" method="post">
-        <input class="mt-3" type="file" accept="image/*" id="file" name="file" onchange="loadFile(event)" style="display: none;"/>
+        <input class="mt-3" type="file" accept="image/*" id="photo" name="photo" onchange="loadFile(event)" style="display: none;"/>
         <button type="submit" id="submit-button">process</button>
     </form>
 
@@ -24,7 +24,7 @@
             <div class="col-10 container-fluid p-3">
                 <div class="row mt-2">
                     <div class="col-4">    
-                        <button type="button" onclick="document.getElementById('file').click();">Загрузить файл</button>
+                        <button type="button" onclick="document.getElementById('photo').click();">Загрузить файл</button>
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -47,7 +47,7 @@
         integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
         crossorigin="anonymous"></script>
     <script>
-        document.getElementById('file').onchange = function(){
+        document.getElementById('photo').onchange = function(){
             document.getElementById('submit-button').click()
         }
         var loadFile = function (event) {
@@ -84,29 +84,65 @@
 
         document.forms['myform'].addEventListener('submit', (event) => {
             event.preventDefault()
-            if(!document.getElementById('file').value){alert('pick a file')}
+            if(!document.getElementById('photo').value){alert('pick a file')}
             
             var url = "bababa";
             
-            fetch(url, {
+            fetch('http://localhost:8000/api/login/', {
                 method: 'POST',
-                body: new FormData(event.target) // event.target is the form
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({'username': 'admin', 'password': 'admin'})
             }).then((response) => {
                 if (!response.ok) {
                     console.log(response.text().then(t=>console.log(t)))
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 return response.json(); // or response.text() or whatever the server sends
-            }).then((body) => {
-                console.log(body)
+            }).then((json) => {
+                console.log(json)
                                 
-                document.getElementById('result').classList.add('res-showed')
-                document.getElementById('file').value=null
-                
+                fetch('http://127.0.0.1:8000/api/downloads/', {
+                    method: 'POST',
+                    body: new FormData(event.target),
+                    headers: {'Authorization': `Token ${json["token"]}`}
+                }).then((response) => {
+                    if (!response.ok) {
+                        console.log(response.text().then(t=>console.log(t)))
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json(); // or response.text() or whatever the server sends
+                }).then((body) => {
+                    console.log(body)
+                                    
+                    document.getElementById('result').classList.add('res-showed')
+                    document.getElementById('file').value=null
+                    
+                })
             }).catch((error) => {
                 // TODO handle error
                 console.log(error)
             });
+
+
+            // fetch(url, {
+            //     method: 'POST',
+            //     body: new FormData(event.target) // event.target is the form
+            // }).then((response) => {
+            //     if (!response.ok) {
+            //         console.log(response.text().then(t=>console.log(t)))
+            //         throw new Error(`HTTP error! Status: ${response.status}`);
+            //     }
+            //     return response.json(); // or response.text() or whatever the server sends
+            // }).then((body) => {
+            //     console.log(body)
+                                
+            //     document.getElementById('result').classList.add('res-showed')
+            //     document.getElementById('file').value=null
+                
+            // }).catch((error) => {
+            //     // TODO handle error
+            //     console.log(error)
+            // });
             return false
 
         });
