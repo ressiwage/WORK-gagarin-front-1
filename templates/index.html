@@ -88,21 +88,23 @@
             
             var url = "bababa";
             
-            fetch('http://localhost:8000/api/login/', {
+            fetch('http://127.0.0.1:5000/api/login/', {
                 method: 'POST',
+                mode: 'no-cors',
                 headers: {'Content-Type': 'application/json'}, 
                 body: JSON.stringify({'username': 'admin', 'password': 'admin'})
             }).then((response) => {
                 if (!response.ok) {
-                    console.log(response.text().then(t=>console.log(t)))
+                    response.json().then( (t)=>{console.log(t)} )
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 return response.json(); // or response.text() or whatever the server sends
             }).then((json) => {
                 console.log(json)
                                 
-                fetch('http://127.0.0.1:8000/api/downloads/', {
+                fetch('http://127.0.0.1:5000/api/downloads/', {
                     method: 'POST',
+                    mode: 'no-cors',
                     body: new FormData(event.target),
                     headers: {'Authorization': `Token ${json["token"]}`}
                 }).then((response) => {
